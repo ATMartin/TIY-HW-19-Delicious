@@ -44,12 +44,25 @@ var Link = Backbone.Model.extend({
  * Next is our collection. This one's pretty simple.
  * We have to use "parse" (the function) because Parse
  * (the server) returns its results wrapped in an outer
- * object. 
+ * object.
+ * getTags() here returns a deduped array of all the tags 
+ * on all the items in our database. This is best served 
+ * from our data layaer, so it's been moved here from its
+ * original home in the TagListView.
+ * getTags() will return "[ ]" if you've forgotten to 
+ * .fetch() the collection, so be careful! 
 **/
 var Links = Backbone.Collection.extend({
   model: Link,
   url: 'https://api.parse.com/1/classes/Bookmarks',
-  parse: function(response) { return response.results; }
+  parse: function(response) { return response.results; },
+  getTags: function() {
+    var tags = this.pluck('tags');
+    return _.chain(tags)
+            .flatten()
+            .uniq()
+            .value();
+  }
 });
 
 
@@ -165,25 +178,14 @@ var TagsView = Backbone.View.extend({
     this.listenTo(this.collection, 'add destroy sync', this.render);
   },
   render: function() {
-    var tags = [],
-        elements = [], // <-- We make an array here to avoid appending in a loop. 
-                       //     Appending objects in a loop takes a lot more overhead
-                       //     than appending a single array out.
+    var elements = [],
         self = this;
-    this.collection.each(function(link) {
-        tags.push(link.get('tags'));
+    // We get all our tags from the collection, then render them 
+    // each out to the element. We aggregate our tags in an array
+    // again to minimize our DOM calls. 
+    this.collection.getTags().forEach(function(tag) {
+      elements.push(self.template({tag: tag}));
     });
-    // This looks nasty, but read along:
-    // "Get all the tags, unpack them into a 
-    // flat (non-nested) array, remove any
-    // duplicates, and add the templated version
-    // of each tag to the element's HTML". 
-    _.chain(tags)
-      .flatten()
-      .uniq()
-      .each(function(tag) {
-        elements.push(self.template({tag: tag}));
-      });
     this.$el.html(elements);
     return this;
   }
