@@ -188,7 +188,22 @@ var TagsView = Backbone.View.extend({
     return this;
   }
 });
- 
+
+/**
+ * Our final view will provide the simplest service of all:
+ * a count of the total links in our collection. 
+**/
+var HeaderView = Backbone.View.extend({
+  template: _.template($('#count-header').text()),
+  initialize: function() {
+    this.listenTo(this.collection, "add sync destroy", this.render);
+  },
+  render: function() {
+    var count = this.collection.length;
+    this.$el.html(this.template({num:count}));
+    return this;
+  }
+}); 
 
 /**
  * Now we have all the views we need for our app. However, 
@@ -211,6 +226,7 @@ var AppRouter = Backbone.Router.extend({
     // as variables.
     this.$container = $('#container');
     this.links = new Links();
+    this.header = new HeaderView({collection: this.links});
     this.linkList = new LinkListView({collection: this.links});
     this.linkForm = new InsertLinkView({collection: this.links});
     this.tagsView = new TagsView({collection: this.links});
@@ -243,10 +259,12 @@ var AppRouter = Backbone.Router.extend({
   // on every page and just modify the data given.
   renderAll: function() {
     this.$container.empty();
+    this.header.render();
     this.linkList.render();
     this.linkForm.render();
     this.tagsView.render();
-    this.$container.html(this.linkList.el);
+    this.$container.html(this.header.el);
+    this.$container.append(this.linkList.el);
     this.$container.append(this.tagsView.el);
     this.$container.append(this.linkForm.el);
 
