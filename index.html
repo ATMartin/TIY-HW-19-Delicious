@@ -6,16 +6,31 @@
 </head>
 <body>
   <div id="container">
-
-
-
   </div>
-<script id="link-template" type="text/template">
-<%= title %>
-<%= url %>
-<%= description %>
-<%= tags %>
-</script>
+
+  <script type="text/template" id="link-template">
+    <strong><%= title %></strong> - (<%= url %>) 
+    <br>
+    <em><%= description %></em>
+    <br>
+    Tags: <%= tags %>
+  </script>
+
+  <script type="text/template" id="new-link-template">
+    <input type="text" class="link-title" placeholder="Title">
+    <br>
+    <input type="text" class="link-url" placeholder="URL">
+    <br>
+    <textarea class="link-description" placeholder="Description"></textarea>
+    <br>
+    <input type="text" class="link-tags" placeholder="Tags (separated by spaces)">
+    <br>
+    <input type="submit">
+  </script>
+
+  <script type="text/template" id="tag-view">
+    <a href="#tags/<%= tag %>"><%= tag %></a>
+  </script>
 
   <script src="bower_components/jquery/dist/jquery.js"></script>
   <script src="bower_components/underscore/underscore.js"></script>
